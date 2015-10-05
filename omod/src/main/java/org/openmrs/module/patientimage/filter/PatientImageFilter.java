@@ -41,11 +41,15 @@ public class PatientImageFilter implements Filter {
 			chain.doFilter(request, responseWrapper);
 			PatientIdentifier id = Context.getPatientService().getPatientByUuid(request.getParameter("patientId"))
 			        .getPatientIdentifier();
-			StringBuilder servletResponse = new StringBuilder(responseWrapper.toString());
-			int indexOf = servletResponse.indexOf("<div class=\"patient-header \">");
-			String imgTag = "<img alt=\"\" id=\"imgThumbnail\" height=\"145\" src=\"/openmrs/moduleServlet/patientimage/ImageServlet?image="
-			        + id.getIdentifier() + ".jpg\" style=\"border: 1px solid #8FABC7; float:right\">";
-			String responseText = servletResponse.insert(indexOf, imgTag).toString();
+			String responseText = responseWrapper.toString();
+			if (null != id) {
+				StringBuilder servletResponse = new StringBuilder(responseWrapper.toString());
+				int indexOf = servletResponse.indexOf("<div class=\"patient-header \">");
+				String imgTag = "<img alt=\"\" id=\"imgThumbnail\" height=\"145\" src=\"/openmrs/moduleServlet/patientimage/ImageServlet?image="
+				        + id.getIdentifier()
+				        + ".jpg\" style=\"border: 1px solid #8FABC7; float:right\" onError=\"this.onerror = '';this.style.display='none';\">";
+				responseText = servletResponse.insert(indexOf, imgTag).toString();
+			}
 			out.write(responseText);
 		} else {
 			chain.doFilter(req, res);
