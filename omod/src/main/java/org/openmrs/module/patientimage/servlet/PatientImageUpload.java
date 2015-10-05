@@ -29,8 +29,9 @@ public class PatientImageUpload extends HttpServlet {
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException,
 	        IOException {
 		try {
-			String id = request.getParameter("identifier");
-			if (id != null) {
+			String id = request.getParameter("identifier").equals("null") ? request.getParameter("patientId") : request
+			        .getParameter("identifier");
+			if (id != null && !id.isEmpty()) {
 				int patientId = Integer.parseInt(id);
 				boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 				if (isMultipart) {
@@ -67,6 +68,7 @@ public class PatientImageUpload extends HttpServlet {
 		catch (Exception ex) {
 			ex.printStackTrace();
 		}
+		response.setStatus(200);
 	}
 	
 	// <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

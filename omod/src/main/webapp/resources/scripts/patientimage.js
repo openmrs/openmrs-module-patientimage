@@ -23,3 +23,71 @@ $j(document).ready(function () {
         $j("#patientDashboardHeader").html(imgTable);
     }
 });
+
+var localMediaStream = null;
+var video = null;
+var canvas = null;
+
+function startCam() {
+    navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+    if (navigator.getUserMedia) {
+        navigator.getUserMedia(
+                {
+                    video: true,
+                    audio: false
+                },
+        function (stream) {
+            localMediaStream = stream;
+            $j("#startCameraButton").hide();
+            $j("#fileUpload").hide();
+            $j("#photoDiv").show();
+            $j("#uploadButton").prop('disabled', true);
+            video = document.createElement("video");
+            video.setAttribute('id', 'video');
+            video.setAttribute('autoplay', 'true');
+            video.height = 200;
+            video.width = 266.66;
+            $j("#patientimg").replaceWith(video);
+            var url = window.URL || window.webkitURL;
+            video.src = url ? url.createObjectURL(stream) : stream;
+            document.getElementById("photoButton").addEventListener("click", function () {
+                canvas = document.createElement("canvas");
+                canvas.setAttribute('id', 'canvas');
+                var ctx = canvas.getContext("2d");
+                canvas.height = 200;
+                canvas.width = 266.66;
+                $j("#video").replaceWith(canvas);
+                ctx.drawImage(video, 0, 0, 266.66, 200);
+                localMediaStream.getTracks()[0].stop();
+                $j("#uploadButton").prop('disabled', false);
+            });
+        },
+                function (error) {
+                    console.log("Could not start camera" + error);
+                }
+        );
+    }
+    else {
+        alert('Sorry, the browser you are using doesn\'t support getUserMedia');
+        return;
+    }
+}
+
+function uploadCanvas() {
+    var fd = new FormData();
+    canvas.toBlob(function (blob)
+    {
+        fd.append('patientimage', blob, 'patientimage.jpg');
+        var url = $j("#uploadUrl").html().replace('&amp;', '&');
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", url, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                location.reload();
+            }
+        };
+        xhr.send(fd);
+    }, 'image/jpeg'
+            );
+
+}
