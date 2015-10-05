@@ -15,6 +15,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.openmrs.PatientIdentifier;
+
+import org.openmrs.api.context.Context;
 
 /**
  * @author sunbiz
@@ -30,13 +33,20 @@ public class PatientImageFilter implements Filter {
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		String requestURI = request.getRequestURI();
-		if (requestURI.endsWith("patient.page")) {
+		Boolean showOn2xDashboard = Boolean.valueOf(Context.getAdministrationService().getGlobalProperty(
+		    "patientimage.showOn2xDashboard"));
+		if (requestURI.endsWith("patient.page") && showOn2xDashboard) {
 			PrintWriter out = res.getWriter();
 			CharResponseWrapper responseWrapper = new CharResponseWrapper((HttpServletResponse) res);
 			chain.doFilter(request, responseWrapper);
-			String servletResponse = new String(responseWrapper.toString());
-			out.write(servletResponse + " filtered");
-			
+			PatientIdentifier id = Context.getPatientService().getPatientByUuid(request.getParameter("patientId"))
+			        .getPatientIdentifier();
+			StringBuilder servletResponse = new StringBuilder(responseWrapper.toString());
+			int indexOf = servletResponse.indexOf("<div class=\"patient-header \">");
+			String imgTag = "<img alt=\"\" id=\"imgThumbnail\" height=\"145\" src=\"/openmrs/moduleServlet/patientimage/ImageServlet?image="
+			        + id.getIdentifier() + ".jpg\" style=\"border: 1px solid #8FABC7; float:right\">";
+			String responseText = servletResponse.insert(indexOf, imgTag).toString();
+			out.write(responseText);
 		} else {
 			chain.doFilter(req, res);
 		}
