@@ -7,16 +7,17 @@ package org.openmrs.module.patientimage;
 
 import java.io.File;
 import java.io.IOException;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.module.Activator;
+import org.openmrs.module.BaseModuleActivator;
 import org.openmrs.util.OpenmrsUtil;
 
 /**
  * This class contains the logic that is run every time this module is either started or shutdown
  */
-public class PatientImageActivator implements Activator {
+public class PatientImageActivator extends BaseModuleActivator {
 
     private final Log log = LogFactory.getLog(this.getClass());
 
