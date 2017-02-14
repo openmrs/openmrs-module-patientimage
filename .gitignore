@@ -1,2 +1,4 @@
 /omod/target/
 /api/target/
+*.iml
+.idea/*
