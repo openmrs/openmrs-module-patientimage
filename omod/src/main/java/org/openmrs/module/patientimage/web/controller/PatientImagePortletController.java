@@ -36,7 +36,29 @@ public class PatientImagePortletController extends PortletController {
 		
 		model.put("showOnDashboard", Context.getAdministrationService().getGlobalProperty(
 		    "patientimage.showOnLegacyDashboard"));
-		
+
+		boolean usePersonImageEndpoint = Boolean.valueOf(Context.getAdministrationService().getGlobalProperty(
+				"patientimage.usePersonImageEndpoint"));
+
+		model.put("usePersonImageEndpoint", Context.getAdministrationService().getGlobalProperty(
+				"patientimage.usePersonImageEndpoint"));
+
+		if (usePersonImageEndpoint) {
+			final String restEndpoint = "ws/rest/v1/personimage";
+			final String URL = request.getScheme() + "://"
+					+ request.getServerName() + ":"
+					+ request.getServerPort() + "/"
+					+ request.getContextPath() + "/"
+					+ restEndpoint;
+			model.put("requestURL", URL);
+		}
+		else {
+			final String endpoint = "moduleServlet/patientimage";
+			final String URL = request.getContextPath() + "/"
+					+ endpoint;
+			model.put("requestURL", URL);
+		}
+
 		String patientId = request.getParameter("patientId");
 		if (patientId != null) {
 			int id = Integer.parseInt(patientId);
@@ -44,13 +66,41 @@ public class PatientImagePortletController extends PortletController {
 			if (patient != null) {
 				PersonAttribute attribute = patient.getAttribute(ps.getPersonAttributeTypeByName("Patient Image"));
 				if (attribute != null) {
-					File imgFolder = new File(OpenmrsUtil.getApplicationDataDirectory(), "patient_images");
+					String imagesDirName = usePersonImageEndpoint ? "person_images" : "patient_images";
+					File imgFolder = new File(OpenmrsUtil.getApplicationDataDirectory(), imagesDirName);
 					if (imgFolder.exists()) {
 						if (!attribute.getValue().trim().equals("")) {
 							File image = new File(imgFolder, attribute.getValue());
 							if (image.exists()) {
 								model.put("patient_image", image.getName());
+							} else {
+								if (usePersonImageEndpoint) {
+									File personImageJpg = new File(imgFolder, patient.getUuid() + ".jpg");
+									File personImageJpeg = new File(imgFolder, patient.getUuid() + ".jpeg");
+									if (personImageJpg.exists()) {
+										model.put("patient_image", personImageJpg.getName());
+									} else if (personImageJpeg.exists()) {
+										model.put("patient_image", personImageJpeg.getName());
+									}
+								} else {
+									File patientImage = new File(imgFolder, patient.getPatientIdentifier().getIdentifier() + ".jpg");
+									if (patientImage.exists()) {
+										model.put("patient_image", patientImage.getName());
+									}
+								}
 							}
+						}
+					}
+				}
+				else {
+					if (usePersonImageEndpoint) {
+						File imgFolder = new File(OpenmrsUtil.getApplicationDataDirectory(), "person_images");
+						File imageJpg = new File(imgFolder, patient.getUuid() + ".jpg");
+						File imageJpeg = new File(imgFolder, patient.getUuid() + ".jpeg");
+						if (imageJpg.exists()) {
+							model.put("patient_image", imageJpg.getName());
+						} else if (imageJpeg.exists()) {
+							model.put("patient_image", imageJpeg.getName());
 						}
 					}
 				}

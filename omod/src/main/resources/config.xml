@@ -64,6 +64,13 @@
             Whether to show preferred patient image on 2.x patient dashboard
         </description>
     </globalProperty>
+    <globalProperty>
+    <property>@MODULE_ID@.usePersonImageEndpoint</property>
+    <defaultValue>true</defaultValue>
+    <description>
+        Whether to use /personimage endpoint instead of proprietary /patientimage endpoint
+    </description>
+</globalProperty>
     <!--/Required Global Properties -->
 		
     <!-- Servlets -->
