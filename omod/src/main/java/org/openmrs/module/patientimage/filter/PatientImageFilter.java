@@ -45,9 +45,29 @@ public class PatientImageFilter implements Filter {
 			if (null != id) {
 				StringBuilder servletResponse = new StringBuilder(responseWrapper.toString());
 				int indexOf = servletResponse.indexOf("<div class=\"patient-header \">");
-				String imgTag = "<img alt=\"\" id=\"imgThumbnail\" height=\"145\" src=\"/openmrs/moduleServlet/patientimage/ImageServlet?image="
-				        + id.getIdentifier()
-				        + ".jpg\" style=\"border: 1px solid #8FABC7; float:right\" onError=\"this.onerror = '';this.style.display='none';\">";
+				String imgUrl;
+				if (Boolean.valueOf(Context.getAdministrationService().getGlobalProperty("patientimage.usePersonImageEndpoint"))) {
+					final String restEndpoint = "/ws/rest/v1/personimage";
+					imgUrl = request.getScheme() + "://"
+							+ request.getServerName() + ":"
+							+ request.getServerPort() + "/"
+							+ request.getContextPath()
+							+ restEndpoint + "/"
+							+ request.getParameter("patientId");
+				}
+				else {
+					final String endpoint = "moduleServlet/patientimage";
+					final String servletName = "ImageServlet";
+					final String imageParamName = "image";
+					final String imageParamValue = id.getIdentifier() + ".jpg";
+
+					imgUrl = request.getContextPath() + "/"
+							+ endpoint + "/"
+							+ servletName + "?"
+							+ imageParamName + "="
+							+ imageParamValue;
+				}
+				String imgTag = "<img alt=\"\" id=\"imgThumbnail\" height=\"145\" src=\"" + imgUrl + "\" style=\"border: 1px solid #8FABC7; float:right\" onError=\"this.onerror = '';this.style.display='none';\">";
 				responseText = servletResponse.insert(indexOf, imgTag).toString();
 			}
 			out.write(responseText);

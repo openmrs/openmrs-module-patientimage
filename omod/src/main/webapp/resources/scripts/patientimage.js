@@ -74,20 +74,42 @@ function startCam() {
 }
 
 function uploadCanvas() {
-    var fd = new FormData();
-    canvas.toBlob(function (blob)
-    {
-        fd.append('patientimage', blob, 'patientimage.jpg');
-        var url = $j("#uploadUrl").html().replace('&amp;', '&');
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", url, true);
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                location.reload();
+    var usePersonImageEndpoint = ($j("#patientimage_usePersonImageEndpoint").html() == 'true');
+    var xhr = new XMLHttpRequest();
+    canvas.toBlob(function (blob) {
+            if (usePersonImageEndpoint) {
+                var patientUuid = $j("#patientUuid").html();
+                url = $j("#uploadUrl").html() + "/" + patientUuid;
+                var base64file;
+                var reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onload = function () {
+                    var base64UriTypeSuffix = "base64,";
+                    var base64Uri = reader.result;
+                    base64file = base64Uri.substring(base64Uri.indexOf(base64UriTypeSuffix) + base64UriTypeSuffix.length);
+                    var requestBody = JSON.stringify({person: patientUuid, base64EncodedImage: base64file});
+                    xhr.open("POST", url, true);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState == 4 && xhr.status == 200) {
+                            location.reload();
+                        }
+                    };
+                    xhr.send(requestBody);
+                };
             }
-        };
-        xhr.send(fd);
-    }, 'image/jpeg'
-            );
+            else {
+                var fd = new FormData();
+                var url = $j("#uploadUrl").html().replace('&amp;', '&');
+                fd.append('patientimage', blob, 'patientimage.jpg');
+                xhr.open("POST", url, true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        location.reload();
+                    }
+                };
+                xhr.send(fd);
+            }
+        }, 'image/jpeg');
 
 }
