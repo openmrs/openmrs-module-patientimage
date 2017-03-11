@@ -12,9 +12,9 @@
     <url>http://openmrs.org</url>
 
     <scm>
-        <connection>scm:svn:http://svn.openmrs.org/openmrs-modules/patientimage/trunk/</connection>
-        <developerConnection>scm:svn:http://svn.openmrs.org/openmrs-modules/patientimage/trunk/</developerConnection>
-        <url>http://svn.openmrs.org/openmrs-modules/patientimage/trunk/</url>
+        <connection>scm:git:git@github.com:openmrs/openmrs-module-patientimage.git</connection>
+        <developerConnection>scm:git:git@github.com:openmrs/openmrs-module-patientimage.git</developerConnection>
+        <url>https://github.com/openmrs/openmrs-module-patientimage.git</url>
     </scm>
 
     <modules>
