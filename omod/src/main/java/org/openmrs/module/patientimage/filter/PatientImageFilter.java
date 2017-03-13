@@ -17,6 +17,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.context.Context;
 
@@ -40,8 +41,12 @@ public class PatientImageFilter implements Filter {
 			PrintWriter out = res.getWriter();
 			CharResponseWrapper responseWrapper = new CharResponseWrapper((HttpServletResponse) res);
 			chain.doFilter(request, responseWrapper);
-			PatientIdentifier id = Context.getPatientService().getPatientByUuid(request.getParameter("patientId"))
-			        .getPatientIdentifier();
+			String idParameter = request.getParameter("patientId");
+			Patient patient = Context.getPatientService().getPatientByUuid(idParameter);
+			if (patient == null) {
+				patient = Context.getPatientService().getPatient(Integer.parseInt(idParameter));
+			}
+			PatientIdentifier id = patient.getPatientIdentifier();
 			String responseText = responseWrapper.toString();
 			if (null != id) {
 				StringBuilder servletResponse = new StringBuilder(responseWrapper.toString());
